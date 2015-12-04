@@ -1,0 +1,3 @@
+importFrom(e1071)
+importFrom(parallel)
+exportPattern("^[^\\.]")

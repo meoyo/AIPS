@@ -1,0 +1,16 @@
+Package: AIPS
+Type: Package
+Title: AIPS : Absolute Inference of Patient Signatures
+Version: 0.99.0
+Date: 2015-05-03
+Description: Description: This package contains the AIPS implementation. It contains necessary functions to assign 2171 different gene signature activations. Assignments could be done on individual samples (N of 1) as well as on dataset of gene expression data.
+Author: Eric R. Paquet	  
+Maintainer: Eric R Paquet <eric.r.paquet@gmail.com>
+biocViews: breast cancer, molecular subtype, classification, cancer, microarray
+Depends: R (>= 2.10)
+Suggests: breastCancerVDX, hgu133a.db
+Imports: e1071, Biobase, parallel
+License: Artistic-2.0
+LazyData: yes
+Packaged: 2013-05-07 04:40:15 UTC; biocbuild
+InstallableEverywhere: yes

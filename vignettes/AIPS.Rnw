@@ -1,0 +1,143 @@
+%\VignetteIndexEntry{AIPS An Introduction (HowTo)}
+%\VignetteDepends{e1071, parallel, hgu133a.db, breastCancerVDX}
+%\VignetteSuggests{}
+%\VignetteImports{}
+%\VignetteKeywords{Breast Cancer, molecular subtype, classification, cancer, microarray}
+%\VignettePackage{AIPS}
+
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{amsmath}
+\usepackage{times}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+\usepackage[american]{babel}
+\usepackage{authblk}
+\renewcommand\Affilfont{\itshape\small}
+\usepackage{Sweave}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\usepackage{graphicx}
+\usepackage{tikz}
+
+
+\textwidth=6.2in
+\textheight=8.5in
+%\parskip=.3cm
+\oddsidemargin=.1in
+\evensidemargin=.1in
+\headheight=-.3in
+
+%------------------------------------------------------------
+% newcommand
+%------------------------------------------------------------
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Rclass}[1]{\textit{#1}}
+\newcommand{\Rpackage}[1]{\textit{#1}}
+\newcommand{\Rexpression}[1]{\texttt{#1}}
+\newcommand{\Rmethod}[1]{{\texttt{#1}}}
+\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
+
+
+\begin{document}
+
+%------------------------------------------------------------
+\title{\Rpackage{AIPS}: Absolute Inference of Patient Signatures (AIPS)}
+%------------------------------------------------------------
+\author[1]{Eric R. Paquet (eric.r.paquet@gmail.com), Michael T. Hallett (michael.t.hallett@mcgill.ca)}
+
+\affil[1]{Department of Biochemistry, Breast cancer informatics,  McGill University, Montreal, Canada}
+
+\SweaveOpts{highlight=TRUE, tidy=TRUE, keep.space=TRUE, keep.blank.space=FALSE, keep.comment=TRUE}
+
+\maketitle
+\tableofcontents
+
+%------------------------------------------------------------
+\section{Introduction}
+%------------------------------------------------------------ 
+
+The \Rpackage{AIPS} package is providing the necessary functions to assign the final set of 2168 selected
+absolute signatures on single gene expression experiment or a dataset of whole-tumor or single cells gene expression data.
+
+
+%------------------------------------------------------------
+\section{Case Study: Assigning breast cancer absolute gene signatures activation to a dataset of breast cancer microarray data}
+%------------------------------------------------------------ 
+We first need to load the package \Rpackage{AIPS} and our example dataset. In this case study we will use a fraction of the full McGill dataset describe in the paper and also \Rpackage{breastCancerVDX}.
+<<loadPackages,results=hide>>=
+library(AIPS)
+data(mcgill.gq)
+@
+
+To get breast cancer absolute gene signatures activation for a dataset we need to provide the expression values that have not been gene centered. It means all the expression values will be positive. In the case of a two-colors array the user should select only the channel that contains the tumor sample (usually the Cy5 channel).
+
+<<showMcGill,results=hide, echo=FALSE>>=
+dim(mcgill.gq$D)
+head(mcgill.gq$D[,1:5])
+head(mcgill.gq$EntrezID)
+@
+
+In the previous code we have shown the size of the expression matrix for the McGill dataset as well as the first expression values and the characters vector of Entrez ids. \Rpackage{AIPS} require the use of Entrez ids to prevent any confusion related to unstable gene symbols.
+<<assignSubtypeToMcGill>>=
+mcgill.aips <- apply.AIPS(mcgill.gq$D[,1:5],
+                          mcgill.gq$EntrezID)
+## Number of low, random and high assignments for the first sample
+## table(mcgill.aips$cl[,1])
+
+## Number of low, random and high assignments for the second sample
+## table(mcgill.aips$cl[,2])
+
+@
+
+apply.AIPS is the function used to assign AIPS models to both single sample and dataset of gene expression data. The first parameter should be a numerical matrix composed of positive-only values. Rows represent genes and columns samples. The second argument represents the EntrezIds corresponding to genes in the first parameter. AIPS will deal with duplicated EntrezId so you should leave them there.
+
+apply.AIPS will return a list of arguments. cl represents the molecular assignment in (low, random, high). The variable prob corresponds to a matrix with three columns and number of rows corresponding to the number of samples in D. This matrix contains the posterior probabilities returned from the Naive Bayes classifier. 
+
+<<assigneSampleOneSubtypeMcGill>>=
+mcgill.first.sample.aips <- apply.AIPS(mcgill.gq$D[,1:5,drop=FALSE],
+                                            mcgill.gq$EntrezID)
+## compare the single versus 5 samples assignments
+## table(mcgill.aips$cl[,1],mcgill.first.sample.aips$cl[,1])
+@
+
+This is the same example as before except now we are assigning subtype to only one sample.
+
+<<assignSubtypeToVDX>>=
+library(breastCancerVDX)
+library(hgu133a.db)
+data(vdx)
+
+hgu133a.entrez <- as.character(as.list(hgu133aENTREZID)[featureNames(vdx)])
+vdx.aips <- apply.AIPS(exprs(vdx)[,1:5],
+                       hgu133a.entrez)
+
+mclvdx.aips <- mclapply.AIPS(exprs(vdx)[,1:5],
+                       hgu133a.entrez)
+## table(vdx.aips$cl[,1])
+@
+
+Here we are assigning AIPS absolute gene signature activations to the \Rpackage{vdx} dataset. We are using \Rpackage(hgu133a.db) to obtain EntrezIds corresponding to the probes of the HG-133A array. \Rpackage{AIPS} has been designed to be applicable on this platform as well as several other platforms.
+
+%------------------------------------------------------------
+%------------------------------------------------------------
+%------------------------------------------------------------
+%------------------------------------------------------------
+%%% CODE Stop
+%------------------------------------------------------------
+%------------------------------------------------------------
+%------------------------------------------------------------
+
+
+\newpage
+%------------------------------------------------------------
+\section{Session Info}
+%------------------------------------------------------------ 
+<<sessionInfo,echo=FALSE,results=tex>>==
+toLatex(sessionInfo())
+@
+
+\end{document}
