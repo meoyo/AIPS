@@ -1,0 +1,38 @@
+## Usage :
+## Rscript kallisto.aips.R paired.end.1.fastq.gz paired.end.2.fastq.gz output_folder
+##
+## Output:
+##
+## All the standard kallisto output in output_folder
+##
+## AND the AIMS and AIPS partitions in:
+##
+## output_folder/AIMS.AIPS.xls
+##
+## --------------------------------------------------------------------------------------
+## --------------------------------------------------------------------------------------
+## INSTALL
+## 
+## To be able to run this script you need to install those
+## R/Bioconductor packages :
+## 
+## AIMS : https://www.bioconductor.org/packages/release/bioc/html/AIMS.html
+## AIPS : https://github.com/meoyo/AIPS
+## org.Hs.eg.db : https://bioconductor.org/packages/release/data/annotation/html/org.Hs.eg.db.html
+##
+## You also need to install kallisto :
+##
+## https://pachterlab.github.io/kallisto/starting.html
+##
+## and a transcriptomes:
+##
+## http://bio.math.berkeley.edu/kallisto/transcriptomes/
+##
+## this example will work with the Homo_sapiens.GRCh38.rel79.cdna.all.fa.gz file.
+##
+## You might have to update the variable KALLISTO.COMMAND to fit your configuration.
+##
+## If you have any questions or concerns contact Eric Paquet at (eric.r.paquet@gmail.com)
+##
+## Copyright McGill University 2016
+##

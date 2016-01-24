@@ -183,7 +183,12 @@ mclapply.AIPS <- function(D,EntrezID){
     
     data(aips.models)
     message(sprintf("Applying %d AIPS model",nModels))
-    aips.assignments <- parallel::mclapply(aips.models,function(current.model){
+    nModels <- length(aips.models)
+    aips.assignments <- parallel::mclapply(1:nModels,function(current.model.i){
+        if (current.model.i %% 100 == 1){
+            message(sprintf("Assigning AIPS model %d/%d",current.model.i,nModels))
+        }
+        current.model <- aips.models[[current.model.i]]
         .apply.nbc(D,EntrezID,current.model$model$model)
     })
     
