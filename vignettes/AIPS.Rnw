@@ -1,5 +1,5 @@
 %\VignetteIndexEntry{AIPS An Introduction (HowTo)}
-%\VignetteDepends{e1071, parallel, hgu133a.db, breastCancerVDX}
+%\VignetteDepends{e1071, hgu133a.db, breastCancerVDX}
 %\VignetteSuggests{}
 %\VignetteImports{}
 %\VignetteKeywords{Breast Cancer, molecular subtype, classification, cancer, microarray}
@@ -60,7 +60,7 @@
 \section{Introduction}
 %------------------------------------------------------------ 
 
-The \Rpackage{AIPS} package is providing the necessary functions to assign the final set of 2168 selected
+The \Rpackage{AIPS} package is providing the necessary functions to assign the final set of 1733 selected
 absolute signatures on single gene expression experiment or a dataset of whole-tumor or single cells gene expression data.
 
 
@@ -83,7 +83,7 @@ head(mcgill.gq$EntrezID)
 
 In the previous code we have shown the size of the expression matrix for the McGill dataset as well as the first expression values and the characters vector of Entrez ids. \Rpackage{AIPS} require the use of Entrez ids to prevent any confusion related to unstable gene symbols.
 <<assignSubtypeToMcGill>>=
-mcgill.aips <- apply.AIPS(mcgill.gq$D[,1:5],
+mcgill.aips <- mclapply.AIPS(mcgill.gq$D[,1:5],
                           mcgill.gq$EntrezID)
 ## Number of low, random and high assignments for the first sample
 ## table(mcgill.aips$cl[,1])
@@ -93,12 +93,12 @@ mcgill.aips <- apply.AIPS(mcgill.gq$D[,1:5],
 
 @
 
-apply.AIPS is the function used to assign AIPS models to both single sample and dataset of gene expression data. The first parameter should be a numerical matrix composed of positive-only values. Rows represent genes and columns samples. The second argument represents the EntrezIds corresponding to genes in the first parameter. AIPS will deal with duplicated EntrezId so you should leave them there.
+mclapply.AIPS (or apply.AIPS) is the function used to assign AIPS models to both single sample and dataset of gene expression data. The first parameter should be a numerical matrix composed of positive-only values. Rows represent genes and columns samples. The second argument represents the EntrezIds corresponding to genes in the first parameter. AIPS will deal with duplicated EntrezId so you should leave them.
 
-apply.AIPS will return a list of arguments. cl represents the molecular assignment in (low, random, high). The variable prob corresponds to a matrix with three columns and number of rows corresponding to the number of samples in D. This matrix contains the posterior probabilities returned from the Naive Bayes classifier. 
+mclapply.AIPS (or apply.AIPS) will return a list of arguments. cl represents the molecular assignment in (low, random/independent, high). The variable posterior corresponds to a matrix with three columns and number of rows corresponding to the number of samples in D. This matrix contains the posterior probabilities returned from the Naive Bayes classifier. The variable gs.info would also provide more information about the gene signatures.
 
 <<assigneSampleOneSubtypeMcGill>>=
-mcgill.first.sample.aips <- apply.AIPS(mcgill.gq$D[,1:5,drop=FALSE],
+mcgill.first.sample.aips <- mclapply.AIPS(mcgill.gq$D[,1:5,drop=FALSE],
                                             mcgill.gq$EntrezID)
 ## compare the single versus 5 samples assignments
 ## table(mcgill.aips$cl[,1],mcgill.first.sample.aips$cl[,1])
@@ -112,15 +112,37 @@ library(hgu133a.db)
 data(vdx)
 
 hgu133a.entrez <- as.character(as.list(hgu133aENTREZID)[featureNames(vdx)])
-vdx.aips <- apply.AIPS(exprs(vdx)[,1:5],
+vdx.aips <- mclapply.AIPS(exprs(vdx)[,1:5],
                        hgu133a.entrez)
 
-mclvdx.aips <- mclapply.AIPS(exprs(vdx)[,1:5],
-                       hgu133a.entrez)
 ## table(vdx.aips$cl[,1])
 @
 
 Here we are assigning AIPS absolute gene signature activations to the \Rpackage{vdx} dataset. We are using \Rpackage(hgu133a.db) to obtain EntrezIds corresponding to the probes of the HG-133A array. \Rpackage{AIPS} has been designed to be applicable on this platform as well as several other platforms.
+
+%------------------------------------------------------------
+\section{The Region Of Independence at quantile q ROIq}
+%------------------------------------------------------------ 
+
+In the AIPS publication we also describe the Region Of Independence at quantile q (ROIq) approach and it is possible to apply this approach on a gene expression given you have a gene signature. Here is how to perform this task :
+
+<<assignROIq>>=
+data(aips.models)
+
+## Get an example gene signature esr1 (estrogen)
+esr1.gs = aips.models[[1706]]$gs.bresat
+
+## Assigned the ROI95 on McGill dataset using the esr1 gene signature
+mcgill.ROI95.esr1.gs <- ROIq (mcgill.gq$D,
+                              mcgill.gq$EntrezID,
+                              list(up=esr1.gs$ENTREZ$up,down=esr1.gs$ENTREZ$down))
+
+## Print a summary of all the assignments
+table(mcgill.ROI95.esr1.gs$cl)
+
+@
+
+This will apply the ROIq using the default quantile (0.95 so the ROI95) using the esr1 (estrogen/ER) gene signature on the McGill gene expression dataset. The variable cl in mcgill.ROI95.esr1.gs will contain the assignments (low, random/independent, or high).
 
 %------------------------------------------------------------
 %------------------------------------------------------------

@@ -9,7 +9,7 @@ columns to samples and a list of Entrez gene ids, this function will
 assign all the AIPS models by taking advantage of the multicore/parallel package. 
 }
 \usage{
-mclapply.AIPS (D, EntrezID)
+mclapply.AIPS (D, EntrezID, n.cores)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -18,6 +18,9 @@ mclapply.AIPS (D, EntrezID)
 }
   \item{EntrezID}{
   A character vector corresponding to the Entrez Ids of the genes of matrix D.
+}
+\item{n.cores}{
+  Number of CPU (cores) to use to run AIPS. Default is detectCores() - 2
 }
 }
 
@@ -36,11 +39,12 @@ mclapply.AIPS (D, EntrezID)
 %%  ~Describe the value returned
 %%  If it is a LIST, use
 \item{cl}{Gene signature activation identified by AIPS. It could be
-  either "low", "random", or "high".}
-\item{prob}{A vector corresponding to the posterior probabilities of the
+  either "low", "random/independent", or "high".}
+\item{posterior}{A vector corresponding to the posterior probabilities of the
   activation classes in cl.}
-\item{all.probs}{A matrix of all the posterior probabilities for all the
-  samples and all the activation classes}
+\item{gs.info}{A matrix that contains the information about the gene
+  signatures (Name, Source, Description)}
+\item{raw.aips}{All the individual AIPS assignments}
 }
 \references{
 Paquet ER, Hallett MT.
@@ -57,20 +61,23 @@ Eric R. Paquet (eric.r.paquet@gmail.com)
 ## Load the McGill dataset used in the paper
 data(mcgill.gq)
 
-## Assigne AIMS on McGill dataset
-mcgill.AIPS <- mclapply.AIPS (mcgill.gq$D,
-                                    mcgill.gq$EntrezID)
+## Assignd AIPS on the first 5 gene expression in the McGill dataset
+mcgill.AIPS <- mclapply.AIPS (mcgill.gq$D[,1:5],
+                              mcgill.gq$EntrezID)
 
-## Print a summary of all the subtype in the dataset
-table(mcgill.AIPS$cl[,1])
+## Print a summary of the assignments for AIPS model #1706
+## for all the patients
+table(mcgill.AIPS$cl[1706,])
+
+## information of the first model
+mcgill.AIPS$gs.info[1706,]
 
 ## We can do the samething using only one sample
 mcgill.AIPS.first <- mclapply.AIPS (mcgill.gq$D[,1,drop=FALSE], 
                                     mcgill.gq$EntrezID)
-table(mcgill.AIPS.first$cl[,1])
 
-## Verify we have the same assignments
-table(mcgill.AIPS$cl[,1], mcgill.AIPS.first$cl[,1])
+## Compare the assignments for patient 1
+table(mcgill.AIPS$cl[,1],mcgill.AIPS.first$cl[,1])
 
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
