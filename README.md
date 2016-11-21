@@ -22,6 +22,6 @@ openVignette()
 
 If you are interested to apply AIPS on RNA-seq samples the easiest way is to follow the instruction in:
 
-kallisto.AIPS/INSTALL
+[kallisto.AIPS/INSTALL](https://github.com/meoyo/AIPS/blob/master/kallisto.AIPS/INSTALL]
 
 If you have any questions please contact Eric Paquet at (eric.r.paquet@gmail.com)
