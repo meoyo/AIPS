@@ -1,0 +1,2 @@
+AIPS_0.99.0 : First commit
+AIPS_1.0.0 : Update documentation, add the ROIq function, add the Normal-like assignments, and improve the mclapply.AIPS function 
